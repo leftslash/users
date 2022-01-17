@@ -37,18 +37,15 @@ func OpenDatabase(dbfile string) (d *Database) {
 }
 
 func (d Database) IsValid(email, password string) (ok bool, e *Error) {
-	stmt := "SELECT id FROM users WHERE email = ? AND passhash = ?"
-	passhash, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
+	stmt := "SELECT passhash FROM users WHERE email = ?"
+	row := d.db.QueryRow(stmt, email)
+	var passhash string
+	err := row.Scan(&passhash)
 	if err != nil {
-		e = Errorf(err, "retrieving user (0x243)")
+		e = Errorf(err, "validating user (0x242)")
 		return
 	}
-	rows, err := d.db.Query(stmt, email, passhash)
-	if err != nil {
-		e = Errorf(err, "retrieving user (0x243)")
-		return
-	}
-	ok = rows.Next()
+	ok = nil == bcrypt.CompareHashAndPassword([]byte(passhash), []byte(password))
 	return
 }
 
