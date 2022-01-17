@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="lib/bootstrap.css">
+    <title>Login</title>
+  </head>
+  <body>
+
+    <div id="login" class="container">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="mt-5 mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input id="email" type="email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input id="password" type="password" class="form-control">
+          </div>
+          <div class="mb-3">
+            <button id="btn-login" type="submit" class="btn btn-primary me-3">Login</buton>
+            <button id="btn-forgot" class="btn btn-secondary">Forgot Password</buton>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="reset" class="d-none container">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="mt-5 mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input id="email" type="email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <button id="btn-reset" type="submit" class="btn btn-primary me-3">Reset Password</buton>
+            <button id="btn-cancel" class="btn btn-secondary">Cancel</buton>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="message" class="d-none container">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="mt-5 mb-3">
+            <div id="txt-message"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+
+      const btnLogin = document.querySelector('#btn-login')
+      const btnForgot = document.querySelector('#btn-forgot')
+      const btnReset = document.querySelector('#btn-reset')
+      const btnCancel = document.querySelector('#btn-cancel')
+      const txtMessage = document.querySelector('#txt-message')
+      const formLogin = document.querySelector('#login')
+      const formReset = document.querySelector('#reset')
+      const formMessage = document.querySelector('#message')
+
+      btnForgot.addEventListener('click', function() {
+        formLogin.classList.toggle('d-none')
+        formReset.classList.toggle('d-none')
+      })
+
+      btnCancel.addEventListener('click', function() {
+        formLogin.classList.toggle('d-none')
+        formReset.classList.toggle('d-none')
+      })
+
+      btnReset.addEventListener('click', function() {
+        txtMessage.innerHTML = "Check your email"
+        formReset.classList.toggle('d-none')
+        formMessage.classList.toggle('d-none')
+      })
+
+      btnLogin.addEventListener('click', function() {
+        txtMessage.innerHTML = "Logging in..."
+        formLogin.classList.toggle('d-none')
+        formMessage.classList.toggle('d-none')
+      })
+
+    </script>
+
+  </body>
+</html>

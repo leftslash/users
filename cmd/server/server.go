@@ -36,7 +36,7 @@ func main() {
 	router.Handle(http.MethodPost, "/api/users", authFunc(users.Add))
 	router.Handle(http.MethodPut, "/api/users", authFunc(users.Update))
 	router.Handle(http.MethodDelete, "/api/users/{id}", authFunc(users.Delete))
-	router.Handle(http.MethodGet, "/*", auth(http.FileServer(http.Dir("."))))
+	router.Handle(http.MethodGet, "/*", auth(http.FileServer(http.Dir("static"))))
 
 	router.HandleFunc(http.MethodGet, "/login", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "login.html")
