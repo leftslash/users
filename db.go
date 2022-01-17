@@ -6,8 +6,8 @@ import (
 	"log"
 	"strconv"
 
+	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
-	_ "modernc.org/sqlite"
 )
 
 const (
@@ -27,7 +27,7 @@ type Database struct {
 }
 
 func OpenDatabase(dbfile string) (d *Database) {
-	db, err := sql.Open("sqlite", dbfile)
+	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
 		log.Fatal(err)
 		return
