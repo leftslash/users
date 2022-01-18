@@ -8,7 +8,7 @@ import (
 	"github.com/leftslash/users"
 )
 
-func makeAuthFunc(a mux.Middleware) func(h http.HandlerFunc) http.Handler {
+func makeAuth(a mux.Middleware) func(h http.HandlerFunc) http.Handler {
 	return func(h http.HandlerFunc) http.Handler {
 		return a(h)
 	}
@@ -26,21 +26,16 @@ func main() {
 
 	router := mux.NewRouter()
 	users := users.NewHandler(dbfile)
-	auth := mux.Auth(mux.AuthOptions{Validator: users.IsValid, FailURL: "/login"})
-	authFunc := makeAuthFunc(auth)
+	auth := makeAuth(mux.Auth(mux.AuthOptions{Validator: users.IsValid, FailURL: "/login"}))
 
 	router.Use(mux.Logger(nil))
 
-	router.Handle(http.MethodGet, "/api/users", authFunc(users.GetAll))
-	router.Handle(http.MethodGet, "/api/users/{id}", authFunc(users.Get))
-	router.Handle(http.MethodPost, "/api/users", authFunc(users.Add))
-	router.Handle(http.MethodPut, "/api/users", authFunc(users.Update))
-	router.Handle(http.MethodDelete, "/api/users/{id}", authFunc(users.Delete))
-	router.Handle(http.MethodGet, "/*", auth(http.FileServer(http.Dir("static"))))
-
-	router.HandleFunc(http.MethodGet, "/login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "login.html")
-	})
+	router.Handle(http.MethodGet, "/api/users", auth(users.GetAll))
+	router.Handle(http.MethodGet, "/api/users/{id}", auth(users.Get))
+	router.Handle(http.MethodPost, "/api/users", auth(users.Add))
+	router.Handle(http.MethodPut, "/api/users", auth(users.Update))
+	router.Handle(http.MethodDelete, "/api/users/{id}", auth(users.Delete))
+	router.Handle(http.MethodGet, "/*", http.FileServer(http.Dir("static")))
 
 	router.Run(addr)
 }
