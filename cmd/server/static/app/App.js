@@ -21,6 +21,9 @@ define(function(require) {
         <li v-for="salutation in salutations">
           <Hello @salute="salute" :salutation="salutation"/>
         </li>
+        <li>
+          <a href="/logout/">Logout</a>
+        </li>
       </ul>
       <div class="ms-3">
         {{message}}

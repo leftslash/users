@@ -8,20 +8,20 @@
   </head>
   <body>
 
-    <div id="login" class="container">
-      <form action="/" method="POST">
+    <div id="tab-login" class="container">
+      <form id="form-login" action="/" method="POST">
         <div class="row">
           <div class="col-lg-3">
             <div class="mt-5 mb-3">
               <label for="email" class="form-label">Email:</label>
-              <input id="email" type="email" class="form-control">
+              <input id="email" type="email" name="username" class="form-control">
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">Password:</label>
-              <input id="password" type="password" class="form-control">
+              <input id="password" type="password" name="password" class="form-control">
             </div>
             <div class="mb-3">
-              <button id="btn-login" type="submit" class="btn btn-primary me-3">Login</buton>
+              <button id="btn-login" class="btn btn-primary me-3">Login</buton>
               <button id="btn-forgot" class="btn btn-secondary">Forgot Password</buton>
             </div>
           </div>
@@ -29,22 +29,24 @@
       </form>
     </div>
 
-    <div id="reset" class="d-none container">
-      <div class="row">
-        <div class="col-lg-3">
-          <div class="mt-5 mb-3">
-            <label for="email" class="form-label">Email:</label>
-            <input id="email" type="email" class="form-control">
-          </div>
-          <div class="mb-3">
-            <button id="btn-reset" type="submit" class="btn btn-primary me-3">Reset Password</buton>
-            <button id="btn-cancel" class="btn btn-secondary">Cancel</buton>
+    <div id="tab-forgot" class="d-none container">
+      <form id="form-forgot" action="/forgot" method="POST">
+        <div class="row">
+          <div class="col-lg-3">
+            <div class="mt-5 mb-3">
+              <label for="forgot-email" class="form-label">Email:</label>
+              <input id="forgot-email" type="email" name="email" class="form-control">
+            </div>
+            <div class="mb-3">
+              <button id="btn-reset" class="btn btn-primary me-3">Reset Password</buton>
+              <button id="btn-cancel" class="btn btn-secondary">Cancel</buton>
+            </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
 
-    <div id="message" class="d-none container">
+    <div id="tab-message" class="d-none container">
       <div class="row">
         <div class="col-lg-3">
           <div class="mt-5 mb-3">
@@ -61,30 +63,44 @@
       const btnReset = document.querySelector('#btn-reset')
       const btnCancel = document.querySelector('#btn-cancel')
       const txtMessage = document.querySelector('#txt-message')
-      const formLogin = document.querySelector('#login')
-      const formReset = document.querySelector('#reset')
-      const formMessage = document.querySelector('#message')
+      const tabLogin = document.querySelector('#tab-login')
+      const tabForgot = document.querySelector('#tab-forgot')
+      const tabMessage = document.querySelector('#tab-message')
+      const formLogin = document.querySelector('#form-login')
+      const formForgot = document.querySelector('#form-forgot')
+      const email = document.querySelector('#email')
+      const forgot = document.querySelector('#forgot-email')
 
-      btnForgot.addEventListener('click', function() {
-        formLogin.classList.toggle('d-none')
-        formReset.classList.toggle('d-none')
-      })
-
-      btnCancel.addEventListener('click', function() {
-        formLogin.classList.toggle('d-none')
-        formReset.classList.toggle('d-none')
-      })
-
-      btnReset.addEventListener('click', function() {
-        txtMessage.innerHTML = "Check your email"
-        formReset.classList.toggle('d-none')
-        formMessage.classList.toggle('d-none')
-      })
-
-      btnLogin.addEventListener('click', function() {
+      btnLogin.addEventListener('click', function(e) {
+        e.preventDefault()
         txtMessage.innerHTML = "Logging in..."
-        formLogin.classList.toggle('d-none')
-        formMessage.classList.toggle('d-none')
+        tabLogin.classList.toggle('d-none')
+        tabMessage.classList.toggle('d-none')
+        formLogin.submit()
+      })
+
+      btnReset.addEventListener('click', function(e) {
+        e.preventDefault()
+        txtMessage.innerHTML = 
+          "<p>If your address is valid, you will receive " +
+          "instructions via email to reset your password.</p>" +
+          "<p>You may close this window.</p>"
+        tabForgot.classList.toggle('d-none')
+        tabMessage.classList.toggle('d-none')
+        // formForgot.submit()
+      })
+
+      btnForgot.addEventListener('click', function(e) {
+        e.preventDefault()
+        forgot.value = email.value
+        tabLogin.classList.toggle('d-none')
+        tabForgot.classList.toggle('d-none')
+      })
+
+      btnCancel.addEventListener('click', function(e) {
+        e.preventDefault()
+        tabLogin.classList.toggle('d-none')
+        tabForgot.classList.toggle('d-none')
       })
 
     </script>

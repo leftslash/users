@@ -36,19 +36,6 @@ func OpenDatabase(dbfile string) (d *Database) {
 	return
 }
 
-func (d Database) IsValid(email, password string) (ok bool, e *Error) {
-	stmt := "SELECT passhash FROM users WHERE email = ?"
-	row := d.db.QueryRow(stmt, email)
-	var passhash string
-	err := row.Scan(&passhash)
-	if err != nil {
-		e = Errorf(err, "validating user (0x242)")
-		return
-	}
-	ok = nil == bcrypt.CompareHashAndPassword([]byte(passhash), []byte(password))
-	return
-}
-
 func (d Database) GetAll() (users []User, e *Error) {
 	var u User
 	stmt := "SELECT id, email, name, country FROM users"
@@ -163,5 +150,28 @@ func (d Database) Update(u User) (e *Error) {
 		e = Errorf(errors.New("no user updated"), "updating user (0x243)")
 		return
 	}
+	return
+}
+
+func (d Database) IsValid(email, password string) (ok bool, e *Error) {
+	stmt := "SELECT passhash FROM users WHERE email = ?"
+	row := d.db.QueryRow(stmt, email)
+	var passhash string
+	err := row.Scan(&passhash)
+	if err != nil {
+		e = Errorf(err, "validating user (0x242)")
+		return
+	}
+	ok = nil == bcrypt.CompareHashAndPassword([]byte(passhash), []byte(password))
+	return
+}
+
+func (d Database) SetTempPassword(email, password string) (e *Error) {
+	// stmt := "UPDATE users SET passhash = ? WHERE email = ?"
+	return
+}
+
+func (d Database) GetUserByTempPassword(password string) (u User, e *Error) {
+	// stmt := "SELECT id, email, name, country FROM users WHERE passhash = ?"
 	return
 }
