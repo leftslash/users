@@ -12,7 +12,7 @@ const dbfile = "users.db"
 
 func main() {
 
-	db, err := sql.Open("sqlite", dbfile)
+	db, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
 		fmt.Printf("cannot create db: %s: %s\n", dbfile, err)
 		os.Exit(1)
@@ -23,7 +23,7 @@ func main() {
 	email TEXT UNIQUE ON CONFLICT ABORT, 
 	name TEXT, 
 	country TEXT, 
-	passhash TEXT
+	password TEXT
 );`
 	_, err = db.Exec(stmt)
 	if err != nil {

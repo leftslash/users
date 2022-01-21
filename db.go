@@ -1,17 +1,21 @@
 package users
 
 import (
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"log"
 	"strconv"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	bcryptCost = 10
+	passwordHashCost    = 10
+	passwordCryptPrefix = "crypt:"
+	passwordTempPrefix  = "temp:"
 )
 
 type User struct {
@@ -95,13 +99,13 @@ func (d Database) Delete(id string) (e *Error) {
 }
 
 func (d Database) Add(u User) (e *Error) {
-	stmt := "INSERT INTO users (email, name, country, passhash) VALUES (?, ?, ?, ?)"
-	passhash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcryptCost)
+	stmt := "INSERT INTO users (email, name, country, password) VALUES (?, ?, ?, ?)"
+	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), passwordHashCost)
 	if err != nil {
 		e = Errorf(err, "adding user (0x243)")
 		return
 	}
-	result, err := d.db.Exec(stmt, u.Email, u.Name, u.Country, passhash)
+	result, err := d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash))
 	if err != nil {
 		e = Errorf(err, "adding user (0x243)")
 		return
@@ -122,13 +126,13 @@ func (d Database) Update(u User) (e *Error) {
 	var result sql.Result
 	var err error
 	if u.Password != "" {
-		stmt := "UPDATE users SET email = ?, name = ?, country = ?, passhash = ? WHERE id = ?"
-		passhash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcryptCost)
+		stmt := "UPDATE users SET email = ?, name = ?, country = ?, password = ? WHERE id = ?"
+		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), passwordHashCost)
 		if err != nil {
 			e = Errorf(err, "adding user (0x243)")
 			return
 		}
-		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, passhash, u.Id)
+		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash), u.Id)
 		if err != nil {
 			e = Errorf(err, "updating user (0x243)")
 			return
@@ -154,24 +158,61 @@ func (d Database) Update(u User) (e *Error) {
 }
 
 func (d Database) IsValid(email, password string) (ok bool, e *Error) {
-	stmt := "SELECT passhash FROM users WHERE email = ?"
+	stmt := "SELECT password FROM users WHERE email = ?"
 	row := d.db.QueryRow(stmt, email)
-	var passhash string
-	err := row.Scan(&passhash)
+	var hash string
+	err := row.Scan(&hash)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return
+		}
 		e = Errorf(err, "validating user (0x242)")
 		return
 	}
-	ok = nil == bcrypt.CompareHashAndPassword([]byte(passhash), []byte(password))
+	if strings.HasPrefix(hash, passwordCryptPrefix) {
+		if len(hash) <= len(passwordCryptPrefix) {
+			return
+		}
+		hash = hash[len(passwordCryptPrefix):]
+		ok = nil == bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+		return
+	}
+	if strings.HasPrefix(hash, passwordTempPrefix) {
+		if len(hash) <= len(passwordTempPrefix) {
+			return
+		}
+		hash = hash[len(passwordTempPrefix):]
+		ok = 1 == subtle.ConstantTimeCompare([]byte(hash), []byte(password))
+		return
+	}
 	return
 }
 
 func (d Database) SetTempPassword(email, password string) (e *Error) {
-	// stmt := "UPDATE users SET passhash = ? WHERE email = ?"
+	stmt := "UPDATE users SET password = ? WHERE email = ?"
+	result, err := d.db.Exec(stmt, passwordTempPrefix+password, email)
+	if err != nil {
+		e = Errorf(err, "setting temporary password (0x243)")
+		return
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		e = Errorf(err, "setting temporary password (0x243)")
+		return
+	}
+	if n != 1 {
+		e = Errorf(errors.New("not found"), "setting temporary password (0x243)")
+		return
+	}
 	return
 }
 
 func (d Database) GetUserByTempPassword(password string) (u User, e *Error) {
-	// stmt := "SELECT id, email, name, country FROM users WHERE passhash = ?"
+	stmt := "SELECT id, email, name, country FROM users WHERE password = ?"
+	err := d.db.QueryRow(stmt, passwordTempPrefix+password).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
+	if err != nil {
+		e = Errorf(err, "retrieving user (0x243)")
+		return
+	}
 	return
 }

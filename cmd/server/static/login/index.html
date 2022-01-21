@@ -9,7 +9,7 @@
   <body>
 
     <div id="tab-login" class="container">
-      <form id="form-login" action="/" method="POST">
+      <form action="/" method="POST">
         <div class="row">
           <div class="col-lg-3">
             <div class="mt-5 mb-3">
@@ -21,8 +21,8 @@
               <input id="password" type="password" name="password" class="form-control">
             </div>
             <div class="mb-3">
-              <button id="btn-login" class="btn btn-primary me-3">Login</buton>
-              <button id="btn-forgot" class="btn btn-secondary">Forgot Password</buton>
+              <button onclick="doLogin()" class="btn btn-primary me-3">Login</buton>
+              <button onclick="gotoForgot()" class="btn btn-secondary">Forgot Password</buton>
             </div>
           </div>
         </div>
@@ -30,7 +30,7 @@
     </div>
 
     <div id="tab-forgot" class="d-none container">
-      <form id="form-forgot" action="/forgot" method="POST">
+      <form action="/forgot" method="POST">
         <div class="row">
           <div class="col-lg-3">
             <div class="mt-5 mb-3">
@@ -38,8 +38,25 @@
               <input id="forgot-email" type="email" name="email" class="form-control">
             </div>
             <div class="mb-3">
-              <button id="btn-reset" class="btn btn-primary me-3">Reset Password</buton>
-              <button id="btn-cancel" class="btn btn-secondary">Cancel</buton>
+              <button onclick="doForgot()" class="btn btn-primary me-3">Reset Password</buton>
+              <button onclick="gotoLogin()" class="btn btn-secondary">Cancel</buton>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="tab-reset" class="d-none container">
+      <form action="/reset" method="POST">
+        <input type="hidden" name="id" value="{{.}}" class="form-control">
+        <div class="row">
+          <div class="col-lg-3">
+            <div class="mt-5 mb-3">
+              <label for="reset-password" class="form-label">Password:</label>
+              <input id="reset-password" type="password" name="password" class="form-control">
+            </div>
+            <div class="mb-3">
+              <button onclick="doReset()" class="btn btn-primary me-3">Reset Password</buton>
             </div>
           </div>
         </div>
@@ -58,29 +75,27 @@
 
     <script>
 
-      const btnLogin = document.querySelector('#btn-login')
-      const btnForgot = document.querySelector('#btn-forgot')
-      const btnReset = document.querySelector('#btn-reset')
-      const btnCancel = document.querySelector('#btn-cancel')
-      const txtMessage = document.querySelector('#txt-message')
       const tabLogin = document.querySelector('#tab-login')
       const tabForgot = document.querySelector('#tab-forgot')
+      const tabReset = document.querySelector('#tab-reset')
       const tabMessage = document.querySelector('#tab-message')
-      const formLogin = document.querySelector('#form-login')
-      const formForgot = document.querySelector('#form-forgot')
+      const formLogin = document.querySelector('#tab-login form')
+      const formForgot = document.querySelector('#tab-forgot form')
+      const formReset = document.querySelector('#tab-reset form')
       const email = document.querySelector('#email')
-      const forgot = document.querySelector('#forgot-email')
+      const forgotEmail = document.querySelector('#forgot-email')
+      const txtMessage = document.querySelector('#txt-message')
 
-      btnLogin.addEventListener('click', function(e) {
-        e.preventDefault()
+      function doLogin() {
+        event.preventDefault()
         txtMessage.innerHTML = "Logging in..."
         tabLogin.classList.toggle('d-none')
         tabMessage.classList.toggle('d-none')
         formLogin.submit()
-      })
+      }
 
-      btnReset.addEventListener('click', function(e) {
-        e.preventDefault()
+      function doForgot() {
+        event.preventDefault()
         txtMessage.innerHTML = 
           "<p>If your address is valid, you will receive " +
           "instructions via email to reset your password.</p>" +
@@ -88,20 +103,28 @@
         tabForgot.classList.toggle('d-none')
         tabMessage.classList.toggle('d-none')
         // formForgot.submit()
-      })
+      }
 
-      btnForgot.addEventListener('click', function(e) {
-        e.preventDefault()
-        forgot.value = email.value
+      function doReset() {
+        event.preventDefault()
+        txtMessage.innerHTML = "Resetting password..."
+        tabReset.classList.toggle('d-none')
+        tabMessage.classList.toggle('d-none')
+        // formReset.submit()
+      }
+
+      function gotoForgot() {
+        event.preventDefault()
+        forgotEmail.value = email.value
         tabLogin.classList.toggle('d-none')
         tabForgot.classList.toggle('d-none')
-      })
+      }
 
-      btnCancel.addEventListener('click', function(e) {
-        e.preventDefault()
+      function gotoLogin() {
+        event.preventDefault()
         tabLogin.classList.toggle('d-none')
         tabForgot.classList.toggle('d-none')
-      })
+      }
 
     </script>
 
