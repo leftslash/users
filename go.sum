@@ -10,6 +10,8 @@ github.com/leftslash/mux v0.0.0-20220119175359-942195ec3436 h1:9bQKjL7TIbgncfZYs
 github.com/leftslash/mux v0.0.0-20220119175359-942195ec3436/go.mod h1:ofGE5330+ZiQne5a5LwcdDCoSgluh+KcEyxv6gNpz/A=
 github.com/leftslash/mux v0.0.0-20220119180641-19b587f90078 h1:XWEbwBdA8TwwsJX7EDKAi7NXmSMwROftmqubBaBR8hk=
 github.com/leftslash/mux v0.0.0-20220119180641-19b587f90078/go.mod h1:ofGE5330+ZiQne5a5LwcdDCoSgluh+KcEyxv6gNpz/A=
+github.com/leftslash/mux v0.0.0-20220122185702-4bca3fa97141 h1:9kNYq2N21wJAilN3XiqqAAJRuZM9gv2OBX9cIRiPrFE=
+github.com/leftslash/mux v0.0.0-20220122185702-4bca3fa97141/go.mod h1:ofGE5330+ZiQne5a5LwcdDCoSgluh+KcEyxv6gNpz/A=
 github.com/leftslash/xcrypto v0.0.0-20220116173505-657879ffb432 h1:sawjZsbp0Fv2F9x/DCWUqCjq3Vq9iC1OVCwpJhaT07s=
 github.com/leftslash/xcrypto v0.0.0-20220116173505-657879ffb432/go.mod h1:HAJoZyE/hIGTpMBItfKP4RQRQ/Jq8Sy6GEPzPOIEtdI=
 github.com/mattn/go-sqlite3 v1.14.10 h1:MLn+5bFRlWMGoSRmJour3CL1w/qL96mvipqpwQW/Sfk=

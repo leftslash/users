@@ -22,12 +22,7 @@ func NewHandler(dbfile string) (h *Handler) {
 }
 
 func (h *Handler) IsValid(email, password string) (ok bool) {
-	var err *Error
-	ok, err = h.db.IsValid(email, password)
-	if err != nil {
-		err.Log()
-	}
-	return
+	return h.db.IsValid(email, password)
 }
 
 func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -60,13 +55,13 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		e := Errorf(err, "adding user (0x243)")
-		e.Handler(w)
+		err = mux.Errorf(err, 0, "adding user")
+		err.Handler(w)
 		return
 	}
-	e := h.db.Add(u)
-	if e != nil {
-		e.Handler(w)
+	err = h.db.Add(u)
+	if err != nil {
+		err.Handler(w)
 		return
 	}
 }
@@ -75,13 +70,13 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		e := Errorf(err, "updating user (0x243)")
-		e.Handler(w)
+		err = mux.Errorf(err, 0, "updating user")
+		err.Handler(w)
 		return
 	}
-	e := h.db.Update(u)
-	if e != nil {
-		e.Handler(w)
+	err = h.db.Update(u)
+	if err != nil {
+		err.Handler(w)
 		return
 	}
 }
