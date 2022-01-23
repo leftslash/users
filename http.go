@@ -55,7 +55,6 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		err = mux.Errorf(err, 0, "adding user")
 		err.Handler(w)
 		return
 	}
@@ -70,7 +69,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		err = mux.Errorf(err, 0, "updating user")
 		err.Handler(w)
 		return
 	}

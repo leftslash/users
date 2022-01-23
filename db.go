@@ -47,7 +47,7 @@ func (d Database) GetAll() (users []User, e mux.Error) {
 	stmt := "SELECT id, email, name, country FROM users"
 	rows, err := d.db.Query(stmt)
 	if err != nil {
-		e = mux.Errorf(err, 0, "retrieving users")
+		e = mux.Errorf(err, 0xe049, "retrieving users")
 		e.Log()
 		return
 	}
@@ -55,7 +55,7 @@ func (d Database) GetAll() (users []User, e mux.Error) {
 		var u User
 		err = rows.Scan(&u.Id, &u.Email, &u.Name, &u.Country)
 		if err != nil {
-			e = mux.Errorf(err, 0, "retrieving users")
+			e = mux.Errorf(err, 0xe085, "retrieving users")
 			e.Log()
 			return
 		}
@@ -67,17 +67,17 @@ func (d Database) GetAll() (users []User, e mux.Error) {
 func (d Database) Get(id string) (u User, e mux.Error) {
 	intId, err := strconv.Atoi(id)
 	if err != nil {
-		e = mux.Errorf(err, 0, "invalid user id %q", id)
+		e = mux.Errorf(err, 0x1698, "invalid user id %q", id)
 		return
 	}
 	stmt := "SELECT id, email, name, country FROM users WHERE id = ?"
 	err = d.db.QueryRow(stmt, intId).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			e = mux.Errorf(fmt.Errorf("no user with id %q", id), 0, "retrieving user")
+			e = mux.Errorf(fmt.Errorf("no user with id %q", id), 0x731c, "retrieving user")
 			return
 		}
-		e = mux.Errorf(err, 0, "retrieving user")
+		e = mux.Errorf(err, 0x8758, "retrieving user")
 		e.Log()
 		return
 	}
@@ -87,24 +87,24 @@ func (d Database) Get(id string) (u User, e mux.Error) {
 func (d Database) Delete(id string) (e mux.Error) {
 	intId, err := strconv.Atoi(id)
 	if err != nil {
-		e = mux.Errorf(err, 0, "invalid user id %q", id)
+		e = mux.Errorf(err, 0xce9a, "invalid user id %q", id)
 		return
 	}
 	stmt := "DELETE FROM users WHERE id = ?"
 	result, err := d.db.Exec(stmt, intId)
 	if err != nil {
-		e = mux.Errorf(err, 0, "deleting user")
+		e = mux.Errorf(err, 0xce4c, "deleting user")
 		e.Log()
 		return
 	}
 	n, err := result.RowsAffected()
 	if err != nil {
-		e = mux.Errorf(err, 0, "deleting user")
+		e = mux.Errorf(err, 0xfd15, "deleting user")
 		e.Log()
 		return
 	}
 	if n != 1 {
-		e = mux.Errorf(fmt.Errorf("no user with id %q", id), 0, "deleting user")
+		e = mux.Errorf(fmt.Errorf("no user with id %q", id), 0xbe69, "deleting user")
 		return
 	}
 	return
@@ -114,24 +114,24 @@ func (d Database) Add(u User) (e mux.Error) {
 	stmt := "INSERT INTO users (email, name, country, password) VALUES (?, ?, ?, ?)"
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), passwordHashCost)
 	if err != nil {
-		e = mux.Errorf(err, 0, "adding user")
+		e = mux.Errorf(err, 0x90f9, "adding user")
 		e.Log()
 		return
 	}
 	result, err := d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash))
 	if err != nil {
-		e = mux.Errorf(err, 0, "adding user")
+		e = mux.Errorf(err, 0x4f9e, "adding user")
 		e.Log()
 		return
 	}
 	n, err := result.RowsAffected()
 	if err != nil {
-		e = mux.Errorf(err, 0, "adding user")
+		e = mux.Errorf(err, 0xe822, "adding user")
 		e.Log()
 		return
 	}
 	if n != 1 {
-		e = mux.Errorf(fmt.Errorf("no user added"), 0, "adding user")
+		e = mux.Errorf(fmt.Errorf("no user added"), 0xd838, "adding user")
 		e.Log()
 		return
 	}
@@ -144,13 +144,13 @@ func (d Database) Update(u User) (e mux.Error) {
 		stmt := "UPDATE users SET email = ?, name = ?, country = ?, password = ? WHERE id = ?"
 		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), passwordHashCost)
 		if err != nil {
-			e = mux.Errorf(err, 0, "updating user")
+			e = mux.Errorf(err, 0xa7ea, "updating user")
 			e.Log()
 			return
 		}
 		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash), u.Id)
 		if err != nil {
-			e = mux.Errorf(err, 0, "updating user")
+			e = mux.Errorf(err, 0x54a5, "updating user")
 			e.Log()
 			return
 		}
@@ -159,19 +159,19 @@ func (d Database) Update(u User) (e mux.Error) {
 		var err error
 		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, u.Id)
 		if err != nil {
-			e = mux.Errorf(err, 0, "updating user")
+			e = mux.Errorf(err, 0x37cd, "updating user")
 			e.Log()
 			return
 		}
 	}
 	n, err := result.RowsAffected()
 	if err != nil {
-		e = mux.Errorf(err, 0, "updating user")
+		e = mux.Errorf(err, 0x2aa0, "updating user")
 		e.Log()
 		return
 	}
 	if n != 1 {
-		e = mux.Errorf(fmt.Errorf("no user with id %q", u.Id), 0, "deleting user")
+		e = mux.Errorf(fmt.Errorf("no user with id %q", u.Id), 0x4c3a, "deleting user")
 		e.Log()
 		return
 	}
@@ -187,7 +187,7 @@ func (d Database) IsValid(email, password string) (ok bool) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return
 		}
-		mux.Errorf(err, 0, "validating user").Log()
+		mux.Errorf(err, 0x780f, "validating user").Log()
 		return
 	}
 	if strings.HasPrefix(hash, passwordCryptPrefix) {
@@ -213,18 +213,18 @@ func (d Database) SetTempPassword(email, password string) (e mux.Error) {
 	stmt := "UPDATE users SET password = ? WHERE email = ?"
 	result, err := d.db.Exec(stmt, passwordTempPrefix+password, email)
 	if err != nil {
-		e = mux.Errorf(err, 0, "setting temporary password")
+		e = mux.Errorf(err, 0xbb61, "setting temporary password")
 		e.Log()
 		return
 	}
 	n, err := result.RowsAffected()
 	if err != nil {
-		e = mux.Errorf(err, 0, "setting temporary password")
+		e = mux.Errorf(err, 0xc9f9, "setting temporary password")
 		e.Log()
 		return
 	}
 	if n != 1 {
-		e = mux.Errorf(errors.New("not found"), 0, "setting temporary password")
+		e = mux.Errorf(errors.New("not found"), 0x399e, "setting temporary password")
 		return
 	}
 	return
@@ -235,10 +235,10 @@ func (d Database) GetUserByTempPassword(password string) (u User, e mux.Error) {
 	err := d.db.QueryRow(stmt, passwordTempPrefix+password).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			e = mux.Errorf(fmt.Errorf("no user"), 0, "retrieving user")
+			e = mux.Errorf(fmt.Errorf("no user"), 0x9e17, "retrieving user")
 			return
 		}
-		e = mux.Errorf(err, 0, "retrieving users")
+		e = mux.Errorf(err, 0x40f6, "retrieving users")
 		e.Log()
 		return
 	}
