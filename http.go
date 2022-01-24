@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/leftslash/mux"
+	"github.com/leftslash/xerror"
 )
 
 type Handler struct {
@@ -55,7 +56,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		e := mux.Errorf(err, 0x4d96, "adding user")
+		e := xerror.Errorf(err, 0x4d96, "adding user")
 		e.Handler(w)
 		return
 	}
@@ -70,7 +71,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		e := mux.Errorf(err, 0x3b15, "updating user")
+		e := xerror.Errorf(err, 0x3b15, "updating user")
 		e.Handler(w)
 		return
 	}
