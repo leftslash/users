@@ -55,12 +55,13 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		err.Handler(w)
+		e := mux.Errorf(err, 0x4d96, "adding user")
+		e.Handler(w)
 		return
 	}
-	err = h.db.Add(u)
-	if err != nil {
-		err.Handler(w)
+	e := h.db.Add(u)
+	if e != nil {
+		e.Handler(w)
 		return
 	}
 }
@@ -69,12 +70,13 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	u := User{}
 	err := mux.ReadJSON(w, r, &u)
 	if err != nil {
-		err.Handler(w)
+		e := mux.Errorf(err, 0x3b15, "updating user")
+		e.Handler(w)
 		return
 	}
-	err = h.db.Update(u)
-	if err != nil {
-		err.Handler(w)
+	e := h.db.Update(u)
+	if e != nil {
+		e.Handler(w)
 		return
 	}
 }

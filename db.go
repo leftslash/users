@@ -29,23 +29,21 @@ type User struct {
 	Password string `json:"password"`
 }
 
-type Database struct {
-	db *sql.DB
-}
+type Database struct{ *sql.DB }
 
-func OpenDatabase(dbfile string) (d *Database) {
-	db, err := sql.Open("sqlite3", dbfile)
+func OpenDatabase(dbfile string) (db *Database) {
+	sqldb, err := sql.Open("sqlite3", dbfile)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	d = &Database{db: db}
+	db = &Database{sqldb}
 	return
 }
 
-func (d Database) GetAll() (users []User, e mux.Error) {
+func (db *Database) GetAll() (users []User, e mux.Error) {
 	stmt := "SELECT id, email, name, country FROM users"
-	rows, err := d.db.Query(stmt)
+	rows, err := db.Query(stmt)
 	if err != nil {
 		e = mux.Errorf(err, 0xe049, "retrieving users")
 		e.Log()
@@ -64,14 +62,14 @@ func (d Database) GetAll() (users []User, e mux.Error) {
 	return
 }
 
-func (d Database) Get(id string) (u User, e mux.Error) {
+func (db *Database) Get(id string) (u User, e mux.Error) {
 	intId, err := strconv.Atoi(id)
 	if err != nil {
 		e = mux.Errorf(err, 0x1698, "invalid user id %q", id)
 		return
 	}
 	stmt := "SELECT id, email, name, country FROM users WHERE id = ?"
-	err = d.db.QueryRow(stmt, intId).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
+	err = db.QueryRow(stmt, intId).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			e = mux.Errorf(fmt.Errorf("no user with id %q", id), 0x731c, "retrieving user")
@@ -84,14 +82,14 @@ func (d Database) Get(id string) (u User, e mux.Error) {
 	return
 }
 
-func (d Database) Delete(id string) (e mux.Error) {
+func (db *Database) Delete(id string) (e mux.Error) {
 	intId, err := strconv.Atoi(id)
 	if err != nil {
 		e = mux.Errorf(err, 0xce9a, "invalid user id %q", id)
 		return
 	}
 	stmt := "DELETE FROM users WHERE id = ?"
-	result, err := d.db.Exec(stmt, intId)
+	result, err := db.Exec(stmt, intId)
 	if err != nil {
 		e = mux.Errorf(err, 0xce4c, "deleting user")
 		e.Log()
@@ -110,7 +108,7 @@ func (d Database) Delete(id string) (e mux.Error) {
 	return
 }
 
-func (d Database) Add(u User) (e mux.Error) {
+func (db *Database) Add(u User) (e mux.Error) {
 	stmt := "INSERT INTO users (email, name, country, password) VALUES (?, ?, ?, ?)"
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), passwordHashCost)
 	if err != nil {
@@ -118,7 +116,7 @@ func (d Database) Add(u User) (e mux.Error) {
 		e.Log()
 		return
 	}
-	result, err := d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash))
+	result, err := db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash))
 	if err != nil {
 		e = mux.Errorf(err, 0x4f9e, "adding user")
 		e.Log()
@@ -138,7 +136,7 @@ func (d Database) Add(u User) (e mux.Error) {
 	return
 }
 
-func (d Database) Update(u User) (e mux.Error) {
+func (db *Database) Update(u User) (e mux.Error) {
 	var result sql.Result
 	if u.Password != "" {
 		stmt := "UPDATE users SET email = ?, name = ?, country = ?, password = ? WHERE id = ?"
@@ -148,7 +146,7 @@ func (d Database) Update(u User) (e mux.Error) {
 			e.Log()
 			return
 		}
-		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash), u.Id)
+		result, err = db.Exec(stmt, u.Email, u.Name, u.Country, passwordCryptPrefix+string(hash), u.Id)
 		if err != nil {
 			e = mux.Errorf(err, 0x54a5, "updating user")
 			e.Log()
@@ -157,7 +155,7 @@ func (d Database) Update(u User) (e mux.Error) {
 	} else {
 		stmt := "UPDATE users SET email = ?, name = ?, country = ? WHERE id = ?"
 		var err error
-		result, err = d.db.Exec(stmt, u.Email, u.Name, u.Country, u.Id)
+		result, err = db.Exec(stmt, u.Email, u.Name, u.Country, u.Id)
 		if err != nil {
 			e = mux.Errorf(err, 0x37cd, "updating user")
 			e.Log()
@@ -178,9 +176,9 @@ func (d Database) Update(u User) (e mux.Error) {
 	return
 }
 
-func (d Database) IsValid(email, password string) (ok bool) {
+func (db *Database) IsValid(email, password string) (ok bool) {
 	stmt := "SELECT password FROM users WHERE email = ?"
-	row := d.db.QueryRow(stmt, email)
+	row := db.QueryRow(stmt, email)
 	var hash string
 	err := row.Scan(&hash)
 	if err != nil {
@@ -209,9 +207,9 @@ func (d Database) IsValid(email, password string) (ok bool) {
 	return
 }
 
-func (d Database) SetTempPassword(email, password string) (e mux.Error) {
+func (db *Database) SetTempPassword(email, password string) (e mux.Error) {
 	stmt := "UPDATE users SET password = ? WHERE email = ?"
-	result, err := d.db.Exec(stmt, passwordTempPrefix+password, email)
+	result, err := db.Exec(stmt, passwordTempPrefix+password, email)
 	if err != nil {
 		e = mux.Errorf(err, 0xbb61, "setting temporary password")
 		e.Log()
@@ -230,9 +228,9 @@ func (d Database) SetTempPassword(email, password string) (e mux.Error) {
 	return
 }
 
-func (d Database) GetUserByTempPassword(password string) (u User, e mux.Error) {
+func (db *Database) GetUserByTempPassword(password string) (u User, e mux.Error) {
 	stmt := "SELECT id, email, name, country FROM users WHERE password = ?"
-	err := d.db.QueryRow(stmt, passwordTempPrefix+password).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
+	err := db.QueryRow(stmt, passwordTempPrefix+password).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			e = mux.Errorf(fmt.Errorf("no user"), 0x9e17, "retrieving user")
