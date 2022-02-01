@@ -69,11 +69,11 @@ func (db *Database) Get(id string) (u User, e xerror.Error) {
 	}
 	stmt := "SELECT id, email, name, country FROM users WHERE id = ?"
 	err = db.QueryRow(stmt, intId).Scan(&u.Id, &u.Email, &u.Name, &u.Country)
+	if errors.Is(err, sql.ErrNoRows) {
+		e = xerror.Errorf(fmt.Errorf("no user with id %q", id), 0x731c, "retrieving user")
+		return
+	}
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			e = xerror.Errorf(fmt.Errorf("no user with id %q", id), 0x731c, "retrieving user")
-			return
-		}
 		e = xerror.Errorf(err, 0x8758, "retrieving user")
 		e.Log()
 		return
