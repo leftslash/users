@@ -48,6 +48,7 @@ func (db *Database) GetAll() (users []User, e xerror.Error) {
 		e.Log()
 		return
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var u User
 		err = rows.Scan(&u.Id, &u.Email, &u.Name, &u.Country)
