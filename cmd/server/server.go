@@ -39,6 +39,8 @@ func main() {
 	router.Handle(http.MethodPut, "/api/users", auth.HandleFunc(users.Update))
 	router.Handle(http.MethodDelete, "/api/users/{id}", auth.HandleFunc(users.Delete))
 
+	// TODO: create static dir filesys *only* once not a zillion times
+
 	// register public urls to fixed assets and login logic
 	router.Handle(http.MethodGet, "/lib/*", http.FileServer(http.Dir("static")))
 	router.Handle(http.MethodGet, "/favicon.ico", http.FileServer(http.Dir("static")))
