@@ -10,8 +10,9 @@ import (
 	"strings"
 
 	"github.com/leftslash/xerror"
-	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
@@ -20,12 +21,37 @@ const (
 	passwordTempPrefix  = "temp:"
 )
 
+type UserStatus int
+
+const (
+	UserStatusUnknown UserStatus = iota
+	UserStatusEnabled
+	UserStatusDisabled
+	UserStatusNewPasswordRequired
+)
+
+func (s UserStatus) String() string {
+	switch s {
+	case UserStatusUnknown:
+		return "unknown"
+	case UserStatusEnabled:
+		return "enabled"
+	case UserStatusDisabled:
+		return "disabled"
+	case UserStatusNewPasswordRequired:
+		return "new password required"
+	default:
+		return "unknown"
+	}
+}
+
 type User struct {
 	Id       int    `json:"id"`
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Country  string `json:"country"`
 	Password string `json:"password"`
+	Status   string `json:"status"`
 }
 
 type Database struct{ *sql.DB }
